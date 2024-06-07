@@ -1,7 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 require("dotenv").config("../.env")
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = process.env.MONGODB_CONN_STR;
 const app = express();
 app.use(cors());
@@ -134,6 +134,22 @@ async function run() {
             }
         })
 
+        app.get("/api/tourist-spots/:id", async (req, res) => {
+            const id = req.params.id;
+
+            try {
+                const data = await TouristSpot.findOne({ _id: new ObjectId(id) });
+
+                if (!data) {
+                    return res.status(404).send({ message: "Tourist spot not found" });
+                }
+                const country = await Country.findOne({ name: data?.country_name })
+                res.status(200).send({ data, country });
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
+        });
+
         // GET ALL TOURIST SPOTS
 
         app.get("/api/tourist-spots", async (req, res) => {
@@ -185,6 +201,40 @@ async function run() {
                 res.status(500).send({ error: error.message });
             }
 
+        });
+
+
+        app.patch("/api/tourist-spots/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+
+            try {
+                const result = await TouristSpot.updateOne(
+                    { _id: new ObjectId(id) }, // Filter by ID
+                    { $set: updatedData } // Update with the provided data
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ error: 'Tourist spot not found' });
+                }
+
+                res.status(200).send({ message: 'Tourist spot updated successfully' });
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
+        });
+        app.delete("/api/tourist-spots/:id", async (req, res) => {
+            const id = req.params.id;
+
+            try {
+                const result = await TouristSpot.deleteOne({ _id: new ObjectId(id) })
+                if (result.deletedCount === 0) {
+
+                    res.send({ message: "Not found." }).status(404);
+                }
+                res.send({ message: "Deleted successfully." }).status(200);
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
         });
 
         app.listen(process.env.PORT, () => {
