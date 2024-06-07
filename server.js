@@ -135,7 +135,7 @@ async function run() {
                 res.status(500).send({ error: error.message });
             }
         })
-        app.get('', (req, res) => {
+        app.get('/', (req, res) => {
             res.send("Server is running.")
         })
         app.get("/api/tourist-spots/:id", async (req, res) => {
