@@ -34,9 +34,11 @@ async function run() {
         console.log("Connected to database");
         const Country = database.collection("countries");
         const TouristSpot = database.collection("tourist-spots");
+        app.get("/api/health", (req, res) => {
+            res.send("ok");
+        })
 
-
-        app.get("/seed", async (req, res) => {
+        app.get("/api/seed", async (req, res) => {
             const countries = [
                 {
                     name: "Bangladesh",
